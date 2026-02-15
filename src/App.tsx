@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -25,29 +26,31 @@ const LoadingSpinner = () => (
 
 function App() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <LanguageProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/app" element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<DashboardPage />} />
-              <Route path="alumni" element={<AlumniDirectoryPage />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="events" element={<EventsPage />} />
-              <Route path="news" element={<NewsPage />} />
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </LanguageProvider>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner />}>
+        <LanguageProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/test" element={<TestPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/app" element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<DashboardPage />} />
+                <Route path="alumni" element={<AlumniDirectoryPage />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="events" element={<EventsPage />} />
+                <Route path="news" element={<NewsPage />} />
+              </Route>
+            </Routes>
+          </AuthProvider>
+        </LanguageProvider>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -27,7 +27,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase is not configured. Auth features will be limited.');
+      setLoading(false);
+      return;
+    }
+
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -42,7 +47,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    // Listen for auth changes - do not use async/await in the callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
@@ -57,6 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) {
+      return { error: new Error('Supabase is not configured') };
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -65,6 +72,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, userData: any) => {
+    if (!isSupabaseConfigured()) {
+      return { error: new Error('Supabase is not configured') };
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -76,6 +86,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured()) {
+      return;
+    }
     await supabase.auth.signOut();
   };
 
